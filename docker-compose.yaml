@@ -1,0 +1,52 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq
+    command: rabbitmq-server
+    expose:
+      - "5672"
+      - "15672"
+
+  client:
+    build: ./client
+    restart: always
+    hostname: client
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - rabbitmq
+
+  microservice:
+    build: ./microservice
+    restart: always
+    hostname: microservice
+    depends_on:
+      - rabbitmq
+      - postgres
+    
+  profile-microservice:
+    build: ./profile-microservice
+    restart: always
+    hostname: profile-microservice
+    depends_on:
+      - rabbitmq
+      - postgres
+  
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:      
+      POSTGRES_PASSWORD: "123123"      
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./pgdata/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    restart: always
+
+volumes:
+  pgdata:
+  
