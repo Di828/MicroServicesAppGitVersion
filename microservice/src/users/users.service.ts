@@ -20,6 +20,10 @@ export class UsersService {
 
     async getUserById(user_id : number){        
         const user = await this.userRepository.findOne({where : {user_id}, include : {all : true}});
+        if (!user){
+            throw new HttpException('Юзера с таким id не существует', HttpStatus.NOT_FOUND);
+        }
+        
         return user;
     }
 
